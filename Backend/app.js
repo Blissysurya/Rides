@@ -5,13 +5,17 @@ dotenv.config();
 const cors = require('cors');
 const connectToDb = require('./db/db');
 app.use(cors());
-
+const userRoutes=require('./routes/user.route.js');
 connectToDb();
+app.use(express.json())
+app.use(express.urlencoded({extended:true}))
+
+
 
 app.get('/', (req, res) => {
   res.send('Hello World');
 });
-
+app.use('/user',userRoutes);
 // app.listen(3000,(req,res)=>{
 //     console.log('Server is running on port 3000');
 // });
