@@ -72,3 +72,74 @@ If the request body is invalid, the response will contain a list of validation e
   ]
 }
 ```
+
+## User Login Endpoint
+
+### Endpoint
+`POST /user/login`
+
+### Description
+This endpoint allows an existing user to log in by providing their email and password.
+
+### Request Body
+The request body should be a JSON object containing the following fields:
+- `email` (string): The user's email address. Must be a valid email.
+- `password` (string): The user's password. Must be at least 5 characters long.
+
+### Response
+- `201 Created`: The user was successfully logged in.
+  - Body: A JSON object containing the JWT token and user details.
+- `400 Bad Request`: The request body is invalid.
+  - Body: A JSON object containing the validation errors.
+- `401 Unauthorized`: The email or password is incorrect.
+  - Body: A JSON object containing an error message.
+
+### Example Request
+```json
+{
+  "email": "john.doe@example.com",
+  "password": "password123"
+}
+```
+
+### Example Response
+```json
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "user": {
+    "_id": "60d0fe4f5311236168a109ca",
+    "fullname": {
+      "firstname": "John",
+      "lastname": "Doe"
+    },
+    "email": "john.doe@example.com"
+  }
+}
+```
+
+### Validation Errors
+If the request body is invalid, the response will contain a list of validation errors. Example:
+```json
+{
+  "errors": [
+    {
+      "msg": "Email is not valid",
+      "param": "email",
+      "location": "body"
+    },
+    {
+      "msg": "Password should be at least 5 characters long",
+      "param": "password",
+      "location": "body"
+    }
+  ]
+}
+```
+
+### Unauthorized Errors
+If the email or password is incorrect, the response will contain an error message. Example:
+```json
+{
+  "message": "Invalid email"
+}
+```
