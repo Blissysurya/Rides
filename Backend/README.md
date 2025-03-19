@@ -101,3 +101,104 @@ This endpoint logs out the currently authenticated user by clearing the authenti
   "message": "Logged out successfully"
 }
 ```
+# Backend API Documentation
+
+## Captain Registration Endpoint
+
+### Endpoint
+`POST /captain/register`
+
+### Description
+This endpoint allows a new captain to register by providing their email, password, full name, and vehicle details.
+
+### Request Body
+The request body should be a JSON object containing the following fields:
+- `email` (string): The captain's email address. Must be a valid email.
+- `password` (string): The captain's password. Must be at least 5 characters long.
+- `fullname` (object): An object containing the captain's full name.
+  - `firstname` (string): The captain's first name. Must be at least 2 characters long.
+  - `lastname` (string): The captain's last name. Must be provided.
+- `vehicle` (object): An object containing the captain's vehicle details.
+  - `color` (string): The color of the vehicle. Must be at least 3 characters long.
+  - `plate` (string): The license plate of the vehicle. Must be at least 3 characters long.
+  - `capacity` (number): The seating capacity of the vehicle. Must be a number and at least 1.
+  - `vehicleType` (string): The type of the vehicle. Must be one of `car`, `bike`, or `auto`.
+
+### Response
+- `201 Created`: The captain was successfully registered.
+  - Body: A JSON object containing the registered captain and a JWT token.
+- `400 Bad Request`: The request body is invalid or a captain with the same email already exists.
+  - Body: A JSON object containing the validation errors or an error message.
+
+### Example Request
+```json
+{
+  "email": "captain.john@example.com",
+  "password": "securepassword",
+  "fullname": {
+    "firstname": "John",
+    "lastname": "Doe"
+  },
+  "vehicle": {
+    "color": "Red",
+    "plate": "XYZ123",
+    "capacity": 4,
+    "vehicleType": "car"
+  }
+}
+```
+
+### Example Response
+```json
+{
+  "captain": {
+    "_id": "60d0fe4f5311236168a109cb",
+    "fullname": {
+      "firstname": "John",
+      "lastname": "Doe"
+    },
+    "email": "captain.john@example.com",
+    "vehicle": {
+      "color": "Red",
+      "plate": "XYZ123",
+      "capacity": 4,
+      "vehicleType": "car"
+    }
+  },
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+}
+```
+
+### Validation Errors
+If the request body is invalid, the response will contain a list of validation errors. Example:
+```json
+{
+  "errors": [
+    {
+      "msg": "Email is not valid",
+      "param": "email",
+      "location": "body"
+    },
+    {
+      "msg": "Password should be atleast 5 characters long",
+      "param": "password",
+      "location": "body"
+    },
+    {
+      "msg": "First name should be atleast 2 characters long",
+      "param": "fullname.firstname",
+      "location": "body"
+    },
+    {
+      "msg": "Color should be atleast 3 characters long",
+      "param": "vehicle.color",
+      "location": "body"
+    },
+    {
+      "msg": "Invalid vehicle type",
+      "param": "vehicle.vehicleType",
+      "location": "body"
+    }
+  ]
+}
+```
