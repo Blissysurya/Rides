@@ -22,56 +22,7 @@ The request body should be a JSON object containing the following fields:
 - `400 Bad Request`: The request body is invalid.
   - Body: A JSON object containing the validation errors.
 
-### Example Request
-```json
-{
-  "email": "john.doe@example.com",
-  "password": "password123",
-  "fullname": {
-    "firstname": "John",
-    "lastname": "Doe"
-  }
-}
-```
-
-### Example Response
-```json
-{
-  "user": {
-    "_id": "60d0fe4f5311236168a109ca",
-    "fullname": {
-      "firstname": "John",
-      "lastname": "Doe"
-    },
-    "email": "john.doe@example.com"
-  },
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-}
-```
-
-### Validation Errors
-If the request body is invalid, the response will contain a list of validation errors. Example:
-```json
-{
-  "errors": [
-    {
-      "msg": "Email is not valid",
-      "param": "email",
-      "location": "body"
-    },
-    {
-      "msg": "Password should be at least 5 characters long",
-      "param": "password",
-      "location": "body"
-    },
-    {
-      "msg": "First name should be at least 2 characters long",
-      "param": "fullname.firstname",
-      "location": "body"
-    }
-  ]
-}
-```
+---
 
 ## User Login Endpoint
 
@@ -94,52 +45,59 @@ The request body should be a JSON object containing the following fields:
 - `401 Unauthorized`: The email or password is incorrect.
   - Body: A JSON object containing an error message.
 
-### Example Request
-```json
-{
-  "email": "john.doe@example.com",
-  "password": "password123"
-}
-```
+---
+
+## User Profile Endpoint
+
+### Endpoint
+`GET /user/profile`
+
+### Description
+This endpoint retrieves the profile of the currently authenticated user.
+
+### Headers
+- `Authorization` (string): A valid JWT token in the format `Bearer <token>`.
+
+### Response
+- `200 OK`: The user's profile was successfully retrieved.
+  - Body: A JSON object containing the user's details.
+- `401 Unauthorized`: The user is not authenticated.
+  - Body: A JSON object containing an error message.
 
 ### Example Response
 ```json
 {
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-  "user": {
-    "_id": "60d0fe4f5311236168a109ca",
-    "fullname": {
-      "firstname": "John",
-      "lastname": "Doe"
-    },
-    "email": "john.doe@example.com"
-  }
+  "_id": "60d0fe4f5311236168a109ca",
+  "fullname": {
+    "firstname": "John",
+    "lastname": "Doe"
+  },
+  "email": "john.doe@example.com"
 }
 ```
 
-### Validation Errors
-If the request body is invalid, the response will contain a list of validation errors. Example:
-```json
-{
-  "errors": [
-    {
-      "msg": "Email is not valid",
-      "param": "email",
-      "location": "body"
-    },
-    {
-      "msg": "Password should be at least 5 characters long",
-      "param": "password",
-      "location": "body"
-    }
-  ]
-}
-```
+---
 
-### Unauthorized Errors
-If the email or password is incorrect, the response will contain an error message. Example:
+## User Logout Endpoint
+
+### Endpoint
+`GET /user/logout`
+
+### Description
+This endpoint logs out the currently authenticated user by clearing the authentication token.
+
+### Headers
+- `Authorization` (string): A valid JWT token in the format `Bearer <token>`.
+
+### Response
+- `200 OK`: The user was successfully logged out.
+  - Body: A JSON object containing a success message.
+- `401 Unauthorized`: The user is not authenticated.
+  - Body: A JSON object containing an error message.
+
+### Example Response
 ```json
 {
-  "message": "Invalid email"
+  "message": "Logged out successfully"
 }
 ```
