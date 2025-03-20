@@ -100,18 +100,21 @@ This endpoint logs out the currently authenticated user by clearing the authenti
 {
   "message": "Logged out successfully"
 }
-```
 # Backend API Documentation
 
-## Captain Registration Endpoint
+## Captain Routes
 
-### Endpoint
+---
+
+### Captain Registration Endpoint
+
+#### Endpoint
 `POST /captain/register`
 
-### Description
+#### Description
 This endpoint allows a new captain to register by providing their email, password, full name, and vehicle details.
 
-### Request Body
+#### Request Body
 The request body should be a JSON object containing the following fields:
 - `email` (string): The captain's email address. Must be a valid email.
 - `password` (string): The captain's password. Must be at least 5 characters long.
@@ -124,13 +127,13 @@ The request body should be a JSON object containing the following fields:
   - `capacity` (number): The seating capacity of the vehicle. Must be a number and at least 1.
   - `vehicleType` (string): The type of the vehicle. Must be one of `car`, `bike`, or `auto`.
 
-### Response
+#### Response
 - `201 Created`: The captain was successfully registered.
   - Body: A JSON object containing the registered captain and a JWT token.
 - `400 Bad Request`: The request body is invalid or a captain with the same email already exists.
   - Body: A JSON object containing the validation errors or an error message.
 
-### Example Request
+#### Example Request
 ```json
 {
   "email": "captain.john@example.com",
@@ -148,7 +151,7 @@ The request body should be a JSON object containing the following fields:
 }
 ```
 
-### Example Response
+#### Example Response
 ```json
 {
   "captain": {
@@ -169,36 +172,117 @@ The request body should be a JSON object containing the following fields:
 }
 ```
 
-### Validation Errors
-If the request body is invalid, the response will contain a list of validation errors. Example:
+---
+
+### Captain Login Endpoint
+
+#### Endpoint
+`POST /captain/login`
+
+#### Description
+This endpoint allows an existing captain to log in by providing their email and password.
+
+#### Request Body
+The request body should be a JSON object containing the following fields:
+- `email` (string): The captain's email address. Must be a valid email.
+- `password` (string): The captain's password. Must be at least 5 characters long.
+
+#### Response
+- `200 OK`: The captain was successfully logged in.
+  - Body: A JSON object containing the JWT token and captain details.
+- `400 Bad Request`: The request body is invalid or the email/password is incorrect.
+  - Body: A JSON object containing the validation errors or an error message.
+
+#### Example Request
 ```json
 {
-  "errors": [
-    {
-      "msg": "Email is not valid",
-      "param": "email",
-      "location": "body"
+  "email": "captain.john@example.com",
+  "password": "securepassword"
+}
+```
+
+#### Example Response
+```json
+{
+  "captain": {
+    "_id": "60d0fe4f5311236168a109cb",
+    "fullname": {
+      "firstname": "John",
+      "lastname": "Doe"
     },
-    {
-      "msg": "Password should be atleast 5 characters long",
-      "param": "password",
-      "location": "body"
-    },
-    {
-      "msg": "First name should be atleast 2 characters long",
-      "param": "fullname.firstname",
-      "location": "body"
-    },
-    {
-      "msg": "Color should be atleast 3 characters long",
-      "param": "vehicle.color",
-      "location": "body"
-    },
-    {
-      "msg": "Invalid vehicle type",
-      "param": "vehicle.vehicleType",
-      "location": "body"
+    "email": "captain.john@example.com",
+    "vehicle": {
+      "color": "Red",
+      "plate": "XYZ123",
+      "capacity": 4,
+      "vehicleType": "car"
     }
-  ]
+  },
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+}
+```
+
+---
+
+### Captain Profile Endpoint
+
+#### Endpoint
+`GET /captain/profile`
+
+#### Description
+This endpoint retrieves the profile of the currently authenticated captain.
+
+#### Headers
+- `Authorization` (string): A valid JWT token in the format `Bearer <token>`.
+
+#### Response
+- `200 OK`: The captain's profile was successfully retrieved.
+  - Body: A JSON object containing the captain's details.
+- `401 Unauthorized`: The captain is not authenticated.
+  - Body: A JSON object containing an error message.
+
+#### Example Response
+```json
+{
+  "captain": {
+    "_id": "60d0fe4f5311236168a109cb",
+    "fullname": {
+      "firstname": "John",
+      "lastname": "Doe"
+    },
+    "email": "captain.john@example.com",
+    "vehicle": {
+      "color": "Red",
+      "plate": "XYZ123",
+      "capacity": 4,
+      "vehicleType": "car"
+    }
+  }
+}
+```
+
+---
+
+### Captain Logout Endpoint
+
+#### Endpoint
+`GET /captain/logout`
+
+#### Description
+This endpoint logs out the currently authenticated captain by clearing the authentication token.
+
+#### Headers
+- `Authorization` (string): A valid JWT token in the format `Bearer <token>`.
+
+#### Response
+- `200 OK`: The captain was successfully logged out.
+  - Body: A JSON object containing a success message.
+- `401 Unauthorized`: The captain is not authenticated.
+  - Body: A JSON object containing an error message.
+
+#### Example Response
+```json
+{
+  "message": "Logout successfully"
 }
 ```

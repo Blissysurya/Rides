@@ -39,6 +39,10 @@ module.exports.registerCaptain = async function(req,res,next){
     res.status(201).json({captain,token});
 }
 
+module.exports.getCaptainProfile = async function(req,res,next){
+    res.status(200).json({captain:req.captain});
+}
+
 module.exports.loginCaptain = async function(req,res,next){
     const errors=validationResult(req);
     if(!errors.isEmpty()){
@@ -46,7 +50,7 @@ module.exports.loginCaptain = async function(req,res,next){
     }
 
     const {email,password}=req.body;
-    const captain= await captainModel.findOne({ email });
+    const captain= await captainModel.findOne({ email }).select('+password');
     if(!captain){
         return res.status(400).json({ message:'Captain with this email does not exist.'})
     }

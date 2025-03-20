@@ -16,7 +16,7 @@ router.post('/register',[
 ],captainController.registerCaptain)
 
 
-router.post('/captain',[
+router.post('/login',[
     body('email').isEmail().withMessage('Email is not valid'),
     body('password').isLength({min:5}).withMessage('Password should be atleast 5 characters long'),
 ],captainController.loginCaptain)
