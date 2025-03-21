@@ -45,7 +45,7 @@ const [email, setEmail] = React.useState('')
             <button
                 className='bg-[#111] text-white font-semibold mb-7 rounded px-4 py-2 border w-full text-lg placeholder:text-base'
             >Login</button>
-            <p className='text-center'>Join a fleet ? <Link to='/signup' className='text-blue-600'>Register as a Captain</Link></p>
+            <p className='text-center'>Join a fleet ? <Link to='/captain-signup' className='text-blue-600'>Register as a Captain</Link></p>
         </form>
     </div>
     <div>
