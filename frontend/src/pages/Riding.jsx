@@ -1,19 +1,18 @@
 import React from 'react'
-
-const WaitingForDriver = (props) => {
+import { Link } from 'react-router-dom'
+const Riding = () => {
   return (
-    <div className="p-5">
-    <h5
-      onClick={() => {
-        props.setWaitingForDriver(false);
-
-      }}
-      className="p-1 text-center absolute w-[93%] top-0"
-    >
-      <i className="text-3xl text-gray-200 ri-arrow-down-wide-line" />
-    </h5>
-   <div className='flex items-center justify-between'>
-   <img
+   
+        <div className='h-screen'>
+            <Link to='/home' className='fixed  right-2 top-2 h-10 w-10 bg-white flex items-center justify-center rounded-full'>
+                <i className='text-lg font-bold ri-home-5-line '></i>
+            </Link>
+            <div className='h-1/2'>
+                <img className='h-full w-full object-cover' src='https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTABLUH3RR9WY4ogN9jIsbV0QTaQWXDvEWW1A&s'></img>
+            </div>
+            <div className='h-1/2 p-4'>
+            <div className='flex items-center justify-between'>
+       <img
           className="h-10"
           src="https://www.pngplay.com/wp-content/uploads/8/Uber-PNG-Photos.png"
           alt="Vehicle"
@@ -30,13 +29,7 @@ const WaitingForDriver = (props) => {
      
       <div className="flex flex-col gap-3 w-full">
         {/* Pickup Location */}
-        <div className="flex items-center gap-3 p-3 border-b-2">
-          <i className="text-lg ri-map-pin-2-fill"></i>
-          <div>
-            <h3 className="text-lg font-medium">562/11-A</h3>
-            <p className="text-sm -mt-1 text-gray-600">NexEra Colony, Hardoi</p>
-          </div>
-        </div>
+        
 
         {/* Destination */}
         <div className="flex items-center gap-3 p-3 border-b-2">
@@ -59,8 +52,11 @@ const WaitingForDriver = (props) => {
 
       
     </div>
-  </div>
+                <button className="w-full bg-green-600 font-semibold p-2 rounded-lg">Make a Payment</button>
+            </div>
+        </div>
+    
   )
 }
 
-export default WaitingForDriver
+export default Riding

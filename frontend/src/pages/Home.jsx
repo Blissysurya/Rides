@@ -84,7 +84,7 @@ const waitingForDriverRef = useRef(null)
     )
     
     useGSAP(function(){
-        if(vehicleFound){
+        if(waitingForDriver){
         gsap.to(waitingForDriverRef.current,{
             transform:'translateY(0)',   
         })
@@ -142,7 +142,9 @@ const waitingForDriverRef = useRef(null)
                     
                     setVehicleFound={setVehicleFound}
                     setWaitingForDriver={setWaitingForDriver}
-                    waitingForDriver={waitingForDriver} />
+                    waitingForDriver={waitingForDriver} 
+                    
+                    />
             </div>
         </div>
     </div>
