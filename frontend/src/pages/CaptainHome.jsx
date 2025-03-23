@@ -1,6 +1,7 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
 import CaptainDetails from '../components/CaptainDetails'
+
 const CaptainHome = () => {
   return (
 
@@ -18,9 +19,9 @@ const CaptainHome = () => {
       <div className='h-2/5 p-6'>
         <CaptainDetails/>
       </div>
-      <div  className='fixed w-full z-10 bottom-0 translate-y-full bg-white px-3 py-6 pt-12'>
+      {/* <div  className='fixed w-full z-10 bottom-0 translate-y-full bg-white px-3 py-6 pt-12'>
             <LookingForDriver />
-        </div>
+        </div> */}
     </div>
   )
 }
