@@ -6,7 +6,7 @@ const cookieParser=require('cookie-parser')
 const cors = require('cors');
 const connectToDb = require('./db/db');
 const mapsRoutes = require('./routes/maps.routes');
-
+const rideRoutes = require('./routes/rides.routes');
 
 
 app.use(cors());
@@ -26,6 +26,7 @@ app.get('/', (req, res) => {
 app.use('/user',userRoutes);
 app.use('/captain',captainRoutes);
 app.use('/maps',mapsRoutes);
+app.use('/rides',rideRoutes);
 // app.listen(3000,(req,res)=>{
 //     console.log('Server is running on port 3000');
 // });
