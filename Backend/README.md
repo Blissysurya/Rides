@@ -286,3 +286,26 @@ This endpoint logs out the currently authenticated captain by clearing the authe
   "message": "Logout successfully"
 }
 ```
+
+# Rides
+
+## Features
+
+- **Location Suggestions:**  
+  As users type in the pickup or destination fields on the booking page, the frontend uses Axios to fetch location suggestions from the backend (`/location/suggest?q=...`). Suggestions are displayed in real-time in the `LocationSearchPanel`.
+
+- **Interactive Selection:**  
+  Clicking a suggestion automatically fills the corresponding input (pickup or destination) and closes the suggestion panel.
+
+- **Modular Components:**  
+  The UI is built with modular React components such as `LocationSearchPanel`, `VehiclePanel`, `ConfirmedRide`, `LookingForDriver`, and `WaitingForDriver`.
+
+## How It Works
+
+1. **User Input:**  
+   When a user types in the pickup or destination input, the frontend calls the backend for suggestions.
+
+2. **Backend Endpoint:**  
+   The backend should expose a GET endpoint `/location/suggest?q=...` that returns a JSON object:
+   ```json
+   { "suggestions": ["Location 1", "Location 2", ...] }

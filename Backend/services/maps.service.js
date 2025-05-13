@@ -22,7 +22,7 @@ module.exports.getAddressCoordnate = async (address) => {
   }
 };
 
-module.exports.getDistaceTime= async (origin,distance)=>{
+module.exports.getDistanceTime= async (origin,distance)=>{
   if(!origin || !distance){
     throw new Error('Origin and distance are required');
   }
