@@ -37,14 +37,16 @@ async function getFare(pickup, destination) {
     
 
     const fare = {
-        auto: baseFare.auto + (((distanceTime.distance.value)/1000) * perKmRate.auto) + (distanceTime.duration.value/60 * perMinuteRate.auto),
-        car: baseFare.car + (((distanceTime.distance.value)/1000) * perKmRate.car) + (distanceTime.duration.value/60 * perMinuteRate.car),
-        motorcycle: baseFare.motorcycle + (((distanceTime.distance.value)/1000) * perKmRate.motorcycle) + (distanceTime.duration.value/60 * perMinuteRate.motorcycle)
+        auto: baseFare.auto + Math.round((((distanceTime.distance.value)/1000) * perKmRate.auto) + (distanceTime.duration.value/60 * perMinuteRate.auto)),
+        car: baseFare.car + Math.round((((distanceTime.distance.value)/1000) * perKmRate.car) + (distanceTime.duration.value/60 * perMinuteRate.car)),
+        motorcycle: baseFare.motorcycle + Math.round((((distanceTime.distance.value)/1000) * perKmRate.motorcycle) + (distanceTime.duration.value/60 * perMinuteRate.motorcycle))
     };
 
     return fare;
 
 }
+
+module.exports.getFare= getFare;
 
 module.exports.createRide = async ({user, pickup, destination, vehicleType}) => {
     if(!user || !pickup || !destination || !vehicleType) {
