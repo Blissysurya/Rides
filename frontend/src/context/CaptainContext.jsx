@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext } from 'react';
+import React, { createContext, useState } from 'react';
 
 // Create the Captain Context
 export const CaptainDataContext = createContext();
@@ -13,7 +13,7 @@ export const CaptainContext = ({ children }) => {
         setCaptain(captainData);
     }
 
-    const value={
+    const value = {
         captain,
         setCaptain,
         updateCaptain,
@@ -22,20 +22,12 @@ export const CaptainContext = ({ children }) => {
         error,
         setError
     }
+    
     return (
-        <CaptainDataContext.Provider value={{ captain, setCaptain }}>
+        <CaptainDataContext.Provider value={value}>
             {children}
         </CaptainDataContext.Provider>
     );
 };
-
-// Custom hook to use the Captain Context
-// export const useCaptain = () => {
-//     const context = useContext(CaptainContext);
-//     if (!context) {
-//         throw new Error('useCaptain must be used within a CaptainProvider');
-//     }
-//     return context;
-// };
 
 export default CaptainContext;
