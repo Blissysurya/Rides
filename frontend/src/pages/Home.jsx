@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react'
+import React, { useRef, useState, useEffect, useContext } from 'react'
 import { useGSAP } from '@gsap/react'
 import gsap from 'gsap'
 import axios from 'axios'
@@ -8,6 +8,8 @@ import VehiclePanel from '../components/VehiclePanel'
 import ConfirmedRide from '../components/ConfirmedRide'
 import LookingForDriver from '../components/LookingForDriver'
 import WaitingForDriver from '../components/WaitingForDriver'
+import { SocketContext } from '../context/SocketContext'
+import { UserDataContext } from '../context/userContext'
 
 const Home = () => {
   const [pickup, setPickup] = useState('')
@@ -24,6 +26,29 @@ const Home = () => {
   const [ride, setRide] = useState(null)
   const [pickupSuggestions, setPickupSuggestions] = useState([])
   const [destinationSuggestions, setDestinationSuggestions] = useState([])
+
+  const { sendMessage, receiveMessage, connected } = useContext(SocketContext)
+  const {user} = useContext(UserDataContext);
+
+  useEffect(() => {
+    if (connected && user && user._id) {
+      console.log("Joining socket as user:", user._id);
+      sendMessage("join", {userType: "user", userId: user._id });
+    }
+    
+    // Set up event listeners for socket messages
+    const unsubscribeRideUpdate = receiveMessage("rideUpdate", (data) => {
+      console.log("Received ride update:", data);
+      if (data.ride) {
+        setRide(data.ride);
+      }
+    });
+    
+    // Cleanup function to prevent memory leaks
+    return () => {
+      unsubscribeRideUpdate();
+    };
+  }, [connected, user, sendMessage, receiveMessage])
 
 
   const panelRef = useRef(null)

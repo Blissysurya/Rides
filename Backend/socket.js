@@ -14,24 +14,32 @@ const initializeSocket = (server) => {
     },
     transports: ['websocket', 'polling'],
     pingTimeout: 60000,
-    connectTimeout: 60000
+    connectTimeout: 60000,
+    maxHttpBufferSize: 1e8, // 100 MB
+    path: '/socket.io'
   });
 
   io.on('connection', (socket) => {
     console.log('New client connected with id: ', socket.id);
 
-     io.on('join', async (data)=>{
-    const {userId, userType} = data;
+    // Handle join event
+    socket.on('join', async (data) => {
+      try {
+        const {userId, userType} = data;
+        console.log(`User ${userId} of type ${userType} joined with socket ${socket.id}`);
 
-    if(userType=='user'){
-        await userModel.findByIdAndUpdate(userId, {socketId: socket.id});
-    }else if(userType=='captain'){
-        await captainModel.findByIdAndUpdate(userId, {socketId: socket.id});
-    }
-  })
+        if(userType=='user'){
+          await userModel.findByIdAndUpdate(userId, {socketId: socket.id});
+        } else if(userType=='captain'){
+          await captainModel.findByIdAndUpdate(userId, {socketId: socket.id});
+        }
+      } catch (error) {
+        console.error('Error in join event:', error);
+      }
+    });
     
-    socket.on('disconnect', () => {
-      console.log('Client disconnected: ', socket.id);
+    socket.on('disconnect', (reason) => {
+      console.log('Client disconnected:', socket.id, 'Reason:', reason);
     });
 
     socket.on('error', (error) => {
@@ -39,10 +47,13 @@ const initializeSocket = (server) => {
     });
   });
 
- 
-
   io.engine.on("connection_error", (err) => {
-    console.log('Connection error:', err.req, err.code, err.message, err.context);
+    console.log('Connection error:', err.code, err.message, err.context);
+  });
+
+  // Handle server errors
+  io.on('error', (error) => {
+    console.error('Socket.IO server error:', error);
   });
 
   return io;
