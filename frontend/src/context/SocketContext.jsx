@@ -65,6 +65,7 @@ const SocketProvider = ({ children }) => {
     (eventName, message) => {
       if (socket && connected) {
         try {
+          console.log(`Sending message to ${eventName}:`, message);
           socket.emit(eventName, message);
           return true;
         } catch (error) {
@@ -92,7 +93,7 @@ const SocketProvider = ({ children }) => {
   );
 
   return (
-    <SocketContext.Provider value={{ connected, sendMessage, receiveMessage }}>
+    <SocketContext.Provider value={{ socket }}>
       {children}
     </SocketContext.Provider>
   );

@@ -37,6 +37,32 @@ const initializeSocket = (server) => {
         console.error('Error in join event:', error);
       }
     });
+
+    socket.on('update-location-captain', async (data) => {
+      try {
+        const { userId, location } = data;
+        
+        // Validate location data
+       
+        
+
+        // Check if latitude and longitude exist and are valid
+       
+        if(!location || !location.ltd || !location.lng){
+          return socket.emit('error',{message: 'Invalid location data'})
+        }
+       
+        await captainModel.findByIdAndUpdate(userId, { location:{
+          ltd:location.ltd,
+          lng:location.lng
+        }}
+      );
+        socket.emit('location-update-success', { message: 'Location updated successfully' });
+      } catch (error) {
+        console.error('Error updating captain location:', error);
+        socket.emit('location-update-error', { message: 'Server error updating location' });
+      }
+    });
     
     socket.on('disconnect', (reason) => {
       console.log('Client disconnected:', socket.id, 'Reason:', reason);
@@ -59,9 +85,9 @@ const initializeSocket = (server) => {
   return io;
 };
 
-const sendMessageToSocketId = (socketId, event, message) => {
+const sendMessageToSocketId = (socketId, messageObject )=> {
   if (io) {
-    io.to(socketId).emit(event, message);
+    io.to(socketId).emit(messageObject.event, messageObject.data);
     return true;
   }
   return false;

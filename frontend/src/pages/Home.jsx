@@ -26,30 +26,76 @@ const Home = () => {
   const [ride, setRide] = useState(null)
   const [pickupSuggestions, setPickupSuggestions] = useState([])
   const [destinationSuggestions, setDestinationSuggestions] = useState([])
+  const [isConnected, setIsConnected] = useState(false)
 
-  const { sendMessage, receiveMessage, connected } = useContext(SocketContext)
-  const {user} = useContext(UserDataContext);
+  const { socket } = useContext(SocketContext)
+  const { user } = useContext(UserDataContext)
+
+  // Define local functions for socket communications
+  const sendMessage = (eventName, message) => {
+    if (socket && isConnected) {
+      console.log(`Sending message to ${eventName}:`, message)
+      socket.emit(eventName, message)
+      return true
+    }
+    console.warn('Socket not connected, cannot send message to', eventName)
+    return false
+  }
+
+  const receiveMessage = (eventName, callback) => {
+    if (socket) {
+      socket.on(eventName, callback)
+      return () => socket.off(eventName, callback)
+    }
+    console.warn('Socket not initialized, cannot receive messages from', eventName)
+    return () => {}
+  }
+
+  // Track socket connection status
+  useEffect(() => {
+    if (!socket) return
+
+    const onConnect = () => {
+      console.log('Socket connected')
+      setIsConnected(true)
+    }
+
+    const onDisconnect = () => {
+      console.log('Socket disconnected')
+      setIsConnected(false)
+    }
+
+    socket.on('connect', onConnect)
+    socket.on('disconnect', onDisconnect)
+    
+    // Set initial connection state
+    setIsConnected(socket.connected)
+
+    return () => {
+      socket.off('connect', onConnect)
+      socket.off('disconnect', onDisconnect)
+    }
+  }, [socket])
 
   useEffect(() => {
-    if (connected && user && user._id) {
-      console.log("Joining socket as user:", user._id);
-      sendMessage("join", {userType: "user", userId: user._id });
+    if (isConnected && user && user._id) {
+      console.log("Joining socket as user:", user._id)
+      sendMessage("join", {userType: "user", userId: user._id})
     }
     
     // Set up event listeners for socket messages
     const unsubscribeRideUpdate = receiveMessage("rideUpdate", (data) => {
-      console.log("Received ride update:", data);
+      console.log("Received ride update:", data)
       if (data.ride) {
-        setRide(data.ride);
+        setRide(data.ride)
       }
-    });
+    })
     
     // Cleanup function to prevent memory leaks
     return () => {
-      unsubscribeRideUpdate();
-    };
-  }, [connected, user, sendMessage, receiveMessage])
-
+      unsubscribeRideUpdate()
+    }
+  }, [isConnected, user])
 
   const panelRef = useRef(null)
   const panelCloseRef = useRef(null)
@@ -291,7 +337,7 @@ const Home = () => {
         </div>
         <div ref={waitingForDriverRef} className='fixed w-full  z-10 bottom-0  bg-white px-3 py-6 pt-12'>
           <WaitingForDriver
-          ride={ride}
+            ride={ride}
             setVehicleFound={setVehicleFound}
             setWaitingForDriver={setWaitingForDriver}
             waitingForDriver={waitingForDriver}

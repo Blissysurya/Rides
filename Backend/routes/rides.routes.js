@@ -20,6 +20,14 @@ router.get('/get-fare',
     rideController.getFare
 )   
 
+router.post('/confirm',
+    authMiddleware.authCaptain,
+    body('rideId').isMongoID().withMessage('Invalid ride ID'),
+    body('otp').isString().isLength({min:4}).withMessage('Invalid OTP'),
+    rideController.confirmRide
+)
+6
+
 
 
 module.exports = router;
