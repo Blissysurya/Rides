@@ -49,42 +49,54 @@ const CaptainHome = () => {
         // return () => clearInterval(locationInterval)
     }, [])
 
-    socket.on('new-ride', (data) => {
+   useEffect(() => {
+    if (!socket) return;
 
-        setRide(data)
-        setRidePopupPanel(true)
+    const handleNewRide = (data) => {
+        setRide(data);
+        setRidePopupPanel(true);
+    };
 
-    })
+    socket.on('new-ride', handleNewRide);
 
-    async function confirmRide(){
+    return () => {
+        socket.off('new-ride', handleNewRide);
+    };
+}, [socket]);
 
-      
-       socket.emit('confirm-ride',{
-          userId: captain._id,
-          rideId: ride._id
-       })
+// ...remove the direct socket.on('new-ride', ...) call from the component body...
 
-       setRidePopupPanel(false);
-       setConfirmedRidePopupPanel(true)
-    }
+   
 
     async function confirmRide() {
-
-        const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/rides/confirm`, {
-
-            rideId: ride._id,
-            captainId: captain._id,
-
-
-        }, {
-            headers: {
-                Authorization: `Bearer ${localStorage.getItem('token')}`
+        try {
+            // Add some error handling and logging
+            console.log("Confirming ride:", ride);
+            
+            if (!ride || !ride._id) {
+                console.error("No valid ride to confirm");
+                return;
             }
-        })
 
-        setRidePopupPanel(false)
-        setConfirmRidePopupPanel(true)
+            const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/rides/confirm`, {
+                rideId: ride._id,
+                // We're sending captain ID through the auth token now
+                // optionally send OTP if needed in the future
+                // otp: "123456" 
+            }, {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem('token')}`
+                }
+            });
 
+            console.log("Ride confirmed:", response.data);
+            
+            setRidePopupPanel(false);
+            setConfirmRidePopupPanel(true);
+        } catch (error) {
+            console.error("Error confirming ride:", error.response?.data || error.message);
+            alert("Failed to confirm ride. Please try again.");
+        }
     }
 
 

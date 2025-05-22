@@ -27,6 +27,8 @@ const Home = () => {
   const [pickupSuggestions, setPickupSuggestions] = useState([])
   const [destinationSuggestions, setDestinationSuggestions] = useState([])
   const [isConnected, setIsConnected] = useState(false)
+ 
+
 
   const { socket } = useContext(SocketContext)
   const { user } = useContext(UserDataContext)
@@ -119,8 +121,22 @@ const Home = () => {
   // }
 
   // Handle pickup input change
+
+  socket.on('ride-confirmed', ride => {
+
+    setVehicleFound(false)
+    setWaitingForDriver(true)
+    setRide(ride)
+  })
+
+  socket.on('ride-started',)
+
   const handlePickupChange = async (e) => {
     setPickup(e.target.value)
+    if (!e.target.value.trim()) {
+      setPickupSuggestions([]);
+      return;
+    }
     try{
       const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/maps/get-suggestions`,{
         params: {input: e.target.value},
@@ -138,6 +154,10 @@ const Home = () => {
   // Handle destination input change
   const handleDestinationChange = async (e) => {
     setDestination(e.target.value)
+    if (!e.target.value.trim()) {
+      setDestinationSuggestions([]);
+      return;
+    }
     try{
       const ressponse = await axios.get(`${import.meta.env.VITE_BASE_URL}/maps/get-suggestions`,{
         params: {input: e.target.value},

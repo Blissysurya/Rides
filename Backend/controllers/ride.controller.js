@@ -72,3 +72,63 @@ module.exports.getFare = async (req,res)=>{
     }
 
 }
+
+module.exports.confirmRide = async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+
+    const {rideId, otp} = req.body;
+
+    try{
+        // Pass all necessary parameters to the service
+        const ride = await rideService.confirmRide({
+            rideId, 
+            captain: req.captain,
+            otp
+        });
+
+        // Send appropriate socket messages
+        if (ride.user && ride.user.socketId) {
+            sendMessageToSocketId(ride.user.socketId, {
+                event: 'ride-confirmed',
+                data: ride
+            });
+        }
+
+        return res.status(200).json(ride);
+    } catch(err) {
+        console.error("Error confirming ride:", err);
+        return res.status(500).json({message: err.message});
+    }
+};
+
+module.exports.startRide = async (req,res) =>{
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+
+    const {rideId, otp} = req.query;
+
+    try{
+        // Pass all necessary parameters to the service
+        const ride = await rideService.startRide({
+            rideId, 
+            captain: req.captain,
+            otp
+        });
+
+        sendMessageToSocketId(ride.user.socketId,{
+                event: 'ride-started',
+                data: ride
+        })
+
+        return res.status(200).json(ride);
+    } catch(err) {
+        console.error("Error starting ride:", err);
+        return res.status(500).json({message: err.message});
+    }
+
+}
