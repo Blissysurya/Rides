@@ -3,15 +3,14 @@ import { Link } from 'react-router-dom';
 import { useState } from 'react';
 const ConfirmRidePopup = (props) => {
 
-     const [otp, setOtp] = useState('')
+    const [otp, setOtp] = useState('')
     
-        const submitHandler=(e)=>{
-            e.preventDefault();
-            
-        }
-
-
-
+    const submitHandler = (e) => {
+        e.preventDefault();
+        // Add actual OTP submission logic here
+        console.log("OTP submitted:", otp);
+        // You would typically make an API call here to verify the OTP
+    }
 
   return (
     <div >   
@@ -74,19 +73,30 @@ const ConfirmRidePopup = (props) => {
            
 
        <div className='mt-6 w-full'>
-            <form onSubmit={()=>{
-                submitHandler(e)
-            }}>
-                <input value={otp}  onChange={()=>{setOtp(e.target.value)}} type="text" className='bg-[#eee] px-6  py-4 font-mono text-lg rounded-lg w-full mt-3 placeholder:text-base' placeholder='Enter OTP'></input>
-                <button  className="flex text-lg justify-center w-full mt-4 bg-green-600 text-white font-semibold p-3 rounded-lg">
-                Confirm Ride
+            <form onSubmit={submitHandler}>
+                <input 
+                    value={otp}  
+                    onChange={(e) => { setOtp(e.target.value) }} 
+                    type="text" 
+                    className='bg-[#eee] px-6 py-4 font-mono text-lg rounded-lg w-full mt-3 placeholder:text-base' 
+                    placeholder='Enter OTP'
+                />
+                <button 
+                    type="submit"
+                    className="flex text-lg justify-center w-full mt-4 bg-green-600 text-white font-semibold p-3 rounded-lg"
+                >
+                    Confirm Ride
                 </button>
 
-                <button onClick={()=>{
-                    props.setConfirmRidePopupPanel(false)
-                    props.setRidePopupPanel(false)
-                }} className="w-full mt-1 text-lg bg-red-600 text-white font-semibold p-3 rounded-lg">
-                Cancel Ride
+                <button 
+                    type="button"
+                    onClick={() => {
+                        props.setConfirmRidePopupPanel(false)
+                        props.setRidePopupPanel(false)
+                    }} 
+                    className="w-full mt-1 text-lg bg-red-600 text-white font-semibold p-3 rounded-lg"
+                >
+                    Cancel Ride
                 </button>
             </form>
        </div>

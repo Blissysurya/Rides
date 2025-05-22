@@ -6,7 +6,7 @@ const ConfirmedRide = (props) => {
 
       <h5
         onClick={() => {
-          props.setconfirmRidePanel(false);
+          props.setConfirmRidePanel(false);
         }}
         className="p-1 text-center absolute w-[93%] top-0"
       >
@@ -52,7 +52,7 @@ const ConfirmedRide = (props) => {
 
         <button onClick={()=>{
             props.setVehicleFound(true)
-            props.setconfirmRidePanel(false)
+            props.setConfirmRidePanel(false)
             props.createRide()
         }} className="w-full bg-green-600 font-semibold p-2 rounded-lg">
           Confirmed Ride

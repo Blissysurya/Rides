@@ -25,4 +25,10 @@ router.get('/profile',authMiddleware.authCaptain,captainController.getCaptainPro
 
 router.get('/logout',authMiddleware.authCaptain,captainController.logoutCaptain);
 
+router.post('/update-status', 
+    authMiddleware.authCaptain, 
+    body('status').isIn(['active', 'inactive']).withMessage('Status must be either active or inactive'),
+    captainController.updateCaptainStatus
+);
+
 module.exports=router;

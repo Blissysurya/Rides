@@ -30,8 +30,15 @@ const initializeSocket = (server) => {
 
         if(userType=='user'){
           await userModel.findByIdAndUpdate(userId, {socketId: socket.id});
+          console.log(`Updated socketId for user ${userId}`);
         } else if(userType=='captain'){
           await captainModel.findByIdAndUpdate(userId, {socketId: socket.id});
+          console.log(`Updated socketId for captain ${userId}`);
+          
+          // Send test message to confirm socket is working
+          setTimeout(() => {
+            socket.emit('connection-test', { message: 'Your socket is working correctly' });
+          }, 1000);
         }
       } catch (error) {
         console.error('Error in join event:', error);
@@ -85,15 +92,56 @@ const initializeSocket = (server) => {
   return io;
 };
 
-const sendMessageToSocketId = (socketId, messageObject )=> {
-  if (io) {
-    io.to(socketId).emit(messageObject.event, messageObject.data);
-    return true;
+const sendMessageToSocketId = (socketId, messageObject) => {
+  if (!io) {
+    console.error('Socket IO not initialized when trying to send message');
+    return false;
   }
-  return false;
+  
+  if (!socketId) {
+    console.error('No socketId provided for message:', messageObject);
+    return false;
+  }
+  
+  // Get the socket by ID
+  const socket = io.sockets.sockets.get(socketId);
+  
+  if (!socket) {
+    console.error(`Socket with ID ${socketId} not found. Message not sent:`, messageObject);
+    return false;
+  }
+  
+  console.log(`Sending ${messageObject.event} to socket ${socketId}`);
+  socket.emit(messageObject.event, messageObject.data);
+  return true;
+};
+
+// Add a function to broadcast to all captains
+const broadcastToCaptains = async (messageObject) => {
+  if (!io) {
+    console.error('Socket IO not initialized when trying to broadcast');
+    return false;
+  }
+  
+  try {
+    const captains = await captainModel.find({ socketId: { $exists: true, $ne: null } });
+    console.log(`Broadcasting to ${captains.length} captains`);
+    
+    captains.forEach(captain => {
+      if (captain.socketId) {
+        sendMessageToSocketId(captain.socketId, messageObject);
+      }
+    });
+    
+    return true;
+  } catch (error) {
+    console.error('Error broadcasting to captains:', error);
+    return false;
+  }
 };
 
 module.exports = {
   initializeSocket,
-  sendMessageToSocketId
+  sendMessageToSocketId,
+  broadcastToCaptains
 };

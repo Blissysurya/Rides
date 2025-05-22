@@ -69,3 +69,24 @@ module.exports.logoutCaptain = async function(req,res,next){
     res.clearCookie('token');
     res.status(200).json({message:'Logout successfully'});
 }
+ 
+module.exports.updateCaptainStatus = async function(req, res, next) {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+
+    try {
+        const { status } = req.body;
+        
+        await captainModel.findByIdAndUpdate(req.captain._id, { status });
+        
+        res.status(200).json({ 
+            message: 'Status updated successfully',
+            status
+        });
+    } catch (error) {
+        console.error('Error updating captain status:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+};
