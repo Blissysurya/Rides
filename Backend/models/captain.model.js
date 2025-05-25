@@ -50,11 +50,11 @@ const captainSchema = new mongoose.Schema({
        },
        vehicleType:{
            type:String,
-           enum:['car','bike','auto'],
+           enum:['car','motorcycle','auto'],
            required:true
        }
     },
-    location:{
+     location:{
        ltd:{
            type:Number,
        },
@@ -78,6 +78,8 @@ const captainSchema = new mongoose.Schema({
     const hashedPassword=await bcrypt.hash(password,10);
     return hashedPassword;
  }
+
+captainSchema.index({ location: "2dsphere" });
 
  const captainModel = mongoose.model('captain',captainSchema);
 

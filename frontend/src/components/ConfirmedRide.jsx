@@ -50,12 +50,63 @@ const ConfirmedRide = (props) => {
           </div>
         </div>
 
-        <button onClick={()=>{
-            props.setVehicleFound(true)
-            props.setConfirmRidePanel(false)
-            props.createRide()
-        }} className="w-full bg-green-600 font-semibold p-2 rounded-lg">
-          Confirmed Ride
+        <button 
+          onClick={async () => {
+            try {
+              // Show loading state
+              const button = document.getElementById('confirm-ride-btn');
+              if (button) {
+                button.textContent = 'Creating ride...';
+                button.disabled = true;
+              }
+              
+              // Make sure we have valid fare data
+              if (!props.fare || typeof props.fare !== 'object' || !Object.keys(props.fare).length) {
+                alert("Unable to create ride: Fare information is missing");
+                if (button) {
+                  button.textContent = 'Confirm Ride';
+                  button.disabled = false;
+                }
+                return;
+              }
+              
+              // Check if vehicle type is valid and fare exists for that type
+              if (!props.vehicleType || !props.fare[props.vehicleType]) {
+                alert("Please select a valid vehicle type");
+                if (button) {
+                  button.textContent = 'Confirm Ride';
+                  button.disabled = false;
+                }
+                return;
+              }
+              
+              // Call the createRide function and wait for result
+              const rideData = await props.createRide(props.vehicleType);
+              
+              // Only proceed if we got valid data back
+              if (rideData && rideData._id) {
+                props.setVehicleFound(true);
+                props.setConfirmRidePanel(false);
+              } else {
+                throw new Error("Invalid ride data returned");
+              }
+            } catch (error) {
+              console.error("Failed to create ride:", error);
+              
+              // Don't show an alert here since createRide already shows specific alerts
+              
+              // Reset button state
+              const button = document.getElementById('confirm-ride-btn');
+              if (button) {
+                button.textContent = 'Confirm Ride';
+                button.disabled = false;
+              }
+            }
+          }} 
+          id="confirm-ride-btn" 
+          className="w-full bg-green-600 font-semibold p-2 rounded-lg text-white"
+        >
+          Confirm Ride
         </button>
       </div>
     </div>

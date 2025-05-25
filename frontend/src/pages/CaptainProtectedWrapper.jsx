@@ -1,7 +1,7 @@
 import React, { useContext } from 'react'
 import { CaptainDataContext } from '../context/CaptainContext'
 import {useNavigate} from 'react-router-dom'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import axios from 'axios'
 
 const CaptainProtectedWrapper = ({
@@ -9,8 +9,7 @@ const CaptainProtectedWrapper = ({
 }) => {
     const token = localStorage.getItem('token')
     const navigate = useNavigate()
-    const {captain, setCaptain} = useContext(CaptainDataContext)
-    const [isLoading, setIsLoading] = useState(true)
+    const {captain, setCaptain, isLoading, setIsLoading, setError} = useContext(CaptainDataContext)
     
     useEffect(() => {
         if(!token){
@@ -27,6 +26,8 @@ const CaptainProtectedWrapper = ({
         
         const fetchCaptainProfile = async () => {
             try {
+                setIsLoading(true);
+                setError && setError(null);
                 console.log("Fetching captain profile data...");
                 const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/captain/profile`, {
                     headers:{
@@ -37,10 +38,12 @@ const CaptainProtectedWrapper = ({
                 if(response.status === 200){
                     console.log("Captain profile data fetched successfully");
                     setCaptain(response.data.captain);
+                    setError && setError(null);
                 } else {
-                    console.error("Unexpected response status:", response.status);
+                    setError && setError("Unable to fetch captain details");
                 }
             } catch (error) {
+                setError && setError("Unable to fetch captain details");
                 console.error("Failed to fetch captain profile:", error);
                 localStorage.removeItem('token');
                 navigate('/captain-login');
@@ -50,7 +53,7 @@ const CaptainProtectedWrapper = ({
         };
         
         fetchCaptainProfile();
-    }, [token, navigate, setCaptain, captain]); 
+    }, [token, navigate, setCaptain, captain, setIsLoading, setError]); 
     
     if(isLoading){
         return (

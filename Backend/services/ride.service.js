@@ -17,6 +17,7 @@ async function getFare(pickup, destination) {
     }
 
     const distanceTime = await mapService.getDistanceTime(pickup, destination);
+
     const baseFare = {
         auto: 30,
         car: 50,
@@ -67,32 +68,23 @@ module.exports.createRide = async ({user, pickup, destination, vehicleType}) => 
 }
 
 module.exports.confirmRide = async ({rideId, captain, otp}) => {
-    if(!rideId){
-        throw new Error('Ride ID is required');
-    }
-    
-    if(!captain){
-        throw new Error('Captain ID is required');
+     if (!rideId) {
+        throw new Error('Ride id is required');
     }
 
-    // Optionally validate OTP if needed
-    // if (!otp) {
-    //     throw new Error('OTP is required');
-    // }
-    
-    // Find and update the ride
-    await rideModel.findOneAndUpdate(
-        { _id: rideId },
-        {
-            status: 'accepted',
-            captain: captain._id
-        }
-    );
+    await rideModel.findOneAndUpdate({
+        _id: rideId
+    }, {
+        status: 'accepted',
+        captain: captain._id
+    })
 
-    const ride = await rideModel.findOne({ _id:rideId}).populate('user').populate('captain').select('+otp');
+    const ride = await rideModel.findOne({
+        _id: rideId
+    }).populate('user').populate('captain').select('+otp');
 
-    if(!ride){
-        throw new Error ('Ride not found');
+    if (!ride) {
+        throw new Error('Ride not found');
     }
 
     return ride;

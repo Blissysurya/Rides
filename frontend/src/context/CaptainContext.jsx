@@ -6,7 +6,7 @@ export const CaptainDataContext = createContext();
 // Create a provider component
 export const CaptainContext = ({ children }) => {
     const [captain, setCaptain] = useState(null);
-    const [isLoading, setIsLoading] = useState(null);
+    const [isLoading, setIsLoading] = useState(true); // Set default to true
     const [error, setError] = useState(null);
 
     const updateCaptain = (captainData) => {

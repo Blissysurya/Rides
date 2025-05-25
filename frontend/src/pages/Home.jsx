@@ -41,36 +41,20 @@ const Home = () => {
     const { user } = useContext(UserDataContext)
 
     useEffect(() => {
-        if (!socket || !user || !user._id) return;
-        
-        console.log("Emitting join event for user:", user._id);
-        socket.emit("join", { userType: "user", userId: user._id });
-        
-        // Set up socket event listeners
-        const handleRideConfirmed = (rideData) => {
-            console.log("Ride confirmed event received:", rideData);
-            setVehicleFound(false);
-            setWaitingForDriver(true);
-            setRide(rideData);
-        };
-        
-        const handleRideStarted = (rideData) => {
-            console.log("Ride started event received:", rideData);
-            setWaitingForDriver(false);
-            navigate('/riding', { state: { ride: rideData } });
-        };
-        
-        // Add the event listeners
-        socket.on('ride-confirmed', handleRideConfirmed);
-        socket.on('ride-started', handleRideStarted);
-        
-        // Clean up the event listeners when the component unmounts
-        return () => {
-            socket.off('ride-confirmed', handleRideConfirmed);
-            socket.off('ride-started', handleRideStarted);
-        };
-    }, [socket, user, navigate])
+        // if(!user) return;
+
+        if (user) {
+            socket.emit("join", { userType: "user", userId: user._id });
+            console.log(user);
+        }
+
+    }, [user])
     
+    socket.on('ride-confirmed', ride => {
+        setVehicleFound(false)
+        setWaitingForDriver(true)
+        setRide(ride);
+    })
 
     const handlePickupChange = async (e) => {
         setPickup(e.target.value)
@@ -196,34 +180,87 @@ const Home = () => {
 
     }
 
-    async function createRide() {
-        try {
-            if (!pickup || !destination || !vehicleType) {
-                console.error("Missing required fields:", { pickup, destination, vehicleType });
-                return;
-            }
-            
-            console.log("Creating ride with:", { pickup, destination, vehicleType });
-            
-            const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/rides/create`, {
+async function createRide(vehicleType) {
+    try {
+        // Debug the environment variable
+        console.log("Base URL:", import.meta.env.VITE_BASE_URL);
+        
+        // Check token first to avoid needless processing
+        const token = localStorage.getItem('token');
+        if (!token) {
+            console.error("No authentication token found");
+            alert("You must be logged in to create a ride. Please log in and try again.");
+            return null;
+        }
+        
+        // Normalize the vehicle type to match backend expectations
+        const validVehicleTypes = ['car', 'auto', 'motorcycle'];
+        if (!validVehicleTypes.includes(vehicleType)) {
+            console.error("Invalid vehicle type:", vehicleType);
+            alert(`Invalid vehicle type. Must be one of: ${validVehicleTypes.join(', ')}`);
+            return null;
+        }
+        
+        console.log("Creating ride with:", { pickup, destination, vehicleType });
+        
+        // Validate required fields
+        if (!pickup || !destination) {
+            console.error("Missing required fields:", { pickup, destination });
+            alert("Please enter both pickup and destination locations");
+            return null;
+        }
+        
+        // Make sure the API URL is correct - Add /api if needed
+        let apiUrl = `${import.meta.env.VITE_BASE_URL}/rides/create`;
+        
+        // Make the API request
+        const response = await axios.post(
+            apiUrl, 
+            {
                 pickup,
                 destination,
                 vehicleType
-            }, {
+            }, 
+            {
                 headers: {
-                    Authorization: `Bearer ${localStorage.getItem('token')}`
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
                 }
-            });
+            }
+        );
+        
+        console.log("Ride created successfully:", response.data);
+        return response.data;
+    } catch (error) {
+        console.error("Error creating ride:", error);
+        
+        // Log detailed error information for debugging
+        if (error.response) {
+            console.error("Error response data:", error.response.data);
+            console.error("Error response status:", error.response.status);
             
-            console.log("Ride created successfully:", response.data);
-            // Transition to Looking for Driver state immediately after creating the ride
-            setVehicleFound(true);
-            setConfirmRidePanel(false);
-        } catch (error) {
-            console.error("Error creating ride:", error.response?.data || error.message);
-            alert("Failed to create ride. Please try again.");
+            // Show a more specific error message based on the response
+            if (error.response.status === 401) {
+                alert("Your session has expired. Please log in again.");
+            } else if (error.response.data && error.response.data.message) {
+                alert(`Error: ${error.response.data.message}`);
+            } else if (error.response.data && error.response.data.errors) {
+                const errorMessages = error.response.data.errors.map(e => e.msg).join(', ');
+                alert(`Validation error: ${errorMessages}`);
+            } else {
+                alert("Unable to create ride. Please try again.");
+            }
+        } else if (error.request) {
+            console.error("No response received:", error.request);
+            alert("No response from server. Please check your internet connection and try again.");
+        } else {
+            console.error("Error message:", error.message);
+            alert(`Error: ${error.message}`);
         }
+        
+        throw error;
     }
+}
 
     return (
         <div className='h-screen relative overflow-hidden'>
@@ -285,6 +322,7 @@ const Home = () => {
             </div>
             <div ref={vehiclePanelRef} className='fixed w-full z-10 bottom-0 translate-y-full bg-white px-3 py-10 pt-12'>
                 <VehiclePanel
+                
                     selectVehicle={setVehicleType}
                     fare={fare} 
                     setConfirmRidePanel={setConfirmRidePanel} 
