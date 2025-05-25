@@ -180,87 +180,22 @@ const Home = () => {
 
     }
 
-async function createRide(vehicleType) {
-    try {
-        // Debug the environment variable
-        console.log("Base URL:", import.meta.env.VITE_BASE_URL);
-        
-        // Check token first to avoid needless processing
-        const token = localStorage.getItem('token');
-        if (!token) {
-            console.error("No authentication token found");
-            alert("You must be logged in to create a ride. Please log in and try again.");
-            return null;
-        }
-        
-        // Normalize the vehicle type to match backend expectations
-        const validVehicleTypes = ['car', 'auto', 'motorcycle'];
-        if (!validVehicleTypes.includes(vehicleType)) {
-            console.error("Invalid vehicle type:", vehicleType);
-            alert(`Invalid vehicle type. Must be one of: ${validVehicleTypes.join(', ')}`);
-            return null;
-        }
-        
-        console.log("Creating ride with:", { pickup, destination, vehicleType });
-        
-        // Validate required fields
-        if (!pickup || !destination) {
-            console.error("Missing required fields:", { pickup, destination });
-            alert("Please enter both pickup and destination locations");
-            return null;
-        }
-        
-        // Make sure the API URL is correct - Add /api if needed
-        let apiUrl = `${import.meta.env.VITE_BASE_URL}/rides/create`;
-        
-        // Make the API request
-        const response = await axios.post(
-            apiUrl, 
-            {
-                pickup,
-                destination,
-                vehicleType
-            }, 
-            {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                }
+    async function createRide(){
+
+        const response = await axios.post(`${import.meta..env.VITE_BASE_URL}/rides/create`,{
+            pickup,
+            destination,
+            vehicleType
+        },{
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem('token')}`
             }
-        );
-        
-        console.log("Ride created successfully:", response.data);
-        return response.data;
-    } catch (error) {
-        console.error("Error creating ride:", error);
-        
-        // Log detailed error information for debugging
-        if (error.response) {
-            console.error("Error response data:", error.response.data);
-            console.error("Error response status:", error.response.status);
-            
-            // Show a more specific error message based on the response
-            if (error.response.status === 401) {
-                alert("Your session has expired. Please log in again.");
-            } else if (error.response.data && error.response.data.message) {
-                alert(`Error: ${error.response.data.message}`);
-            } else if (error.response.data && error.response.data.errors) {
-                const errorMessages = error.response.data.errors.map(e => e.msg).join(', ');
-                alert(`Validation error: ${errorMessages}`);
-            } else {
-                alert("Unable to create ride. Please try again.");
-            }
-        } else if (error.request) {
-            console.error("No response received:", error.request);
-            alert("No response from server. Please check your internet connection and try again.");
-        } else {
-            console.error("Error message:", error.message);
-            alert(`Error: ${error.message}`);
-        }
-        
-        throw error;
+        })
     }
-}
+
+
+
+
 
     return (
         <div className='h-screen relative overflow-hidden'>

@@ -66,7 +66,7 @@ module.exports.getAutoCompleteSuggestions = async (input) => {
     const response = await axios.get(url);
 
     if(response.data.status === 'OK'){
-      return response.data.predictions;
+      return response.data.predictions.map(prediction => prediction.description).filter(value => value);
     } else {
       throw new Error('Unable to fetch autocomplete suggestions');
     }
@@ -77,16 +77,17 @@ module.exports.getAutoCompleteSuggestions = async (input) => {
 
 }
 
-module.exports.getCaptainsInTheRadius = async (lat, lng, radius) => {
-    console.log(`Looking for captains at coordinates: lat=${lat}, lng=${lng} with radius=${radius}km`);
+module.exports.getCaptainsInTheRadius = async (ltd, lng, radius) => {
+    console.log(`Looking for captains at coordinates: lat=${ltd}, lng=${lng} with radius=${radius}km`);
 
    const captains = await captainModel.find({
 
     location:{
-      $centerSphere: [[lat,lng],radius/6378.1]
+        $geoWithin: {
+            $centerSphere: [[ltd,lng], radius / 6378.1] // Radius in kilometers
     }
-
-   })
+   }}
+  )
 
    return captains;
   

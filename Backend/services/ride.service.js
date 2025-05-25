@@ -55,7 +55,7 @@ module.exports.createRide = async ({user, pickup, destination, vehicleType}) => 
         throw new Error('Invalid input');
     }
     const fare = await getFare(pickup, destination);
-    const ride = new rideModel({
+    const ride =  rideModel({
         user,
         pickup,
         destination,
