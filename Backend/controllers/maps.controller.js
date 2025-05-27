@@ -36,21 +36,20 @@ module.exports.getDistanceTime = async (req,res)=>{
    }
 }
 
-module.exports.getAutoCompleteSuggestions = async (req,res) =>{
-    try{
-      const errors = validationResult(req);
-      if(!errors.isEmpty()){
-        return res.status(400).json({errors : errors.array()})
-      }
+module.exports.getAutoCompleteSuggestions = async (req, res) => {
+    try {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
+        }
 
-      const {input} = req.query;  
-      const suggestions = await mapService.getAutoCompleteSuggestions(input);
-      // Map to array of strings
-      const suggestionDescriptions = suggestions.map(s => s.description);
-      res.status(200).json(suggestionDescriptions);
-
-    }catch(err){
-        console.error(err);
-        res.status(500).json({message : 'Internal server error'})
+        const { input } = req.query;
+        console.log("Fetching autocomplete suggestions for:", input); // Debugging
+        const suggestions = await mapService.getAutoCompleteSuggestions(input);
+        console.log("Suggestions received from service:", suggestions); // Debugging
+        res.status(200).json(suggestions);
+    } catch (err) {
+        console.error("Error in getAutoCompleteSuggestions:", err);
+        res.status(500).json({ message: 'Internal server error' });
     }
-}
+};

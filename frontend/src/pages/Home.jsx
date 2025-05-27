@@ -12,6 +12,8 @@ import { SocketContext } from '../context/SocketContext';
 import { useContext } from 'react';
 import { UserDataContext } from '../context/userContext';
 import { useNavigate } from 'react-router-dom';
+import LiveTracking from '../components/LiveTracking';
+
 
 
 const Home = () => {
@@ -32,7 +34,7 @@ const Home = () => {
     const [ destinationSuggestions, setDestinationSuggestions ] = useState([])
     const [ activeField, setActiveField ] = useState(null)
     const [ fare, setFare ] = useState({})
-    const [ vehicleType, setVehicleType ] = useState(null)
+    const [ vehicleType, setVehicleType ] = useState('car') // Default value to prevent null
     const [ ride, setRide ] = useState(null)
 
     const navigate = useNavigate()
@@ -41,49 +43,82 @@ const Home = () => {
     const { user } = useContext(UserDataContext)
 
     useEffect(() => {
-        // if(!user) return;
-
         if (user) {
             socket.emit("join", { userType: "user", userId: user._id });
             console.log(user);
         }
-
     }, [user])
     
-    socket.on('ride-confirmed', ride => {
-        setVehicleFound(false)
-        setWaitingForDriver(true)
-        setRide(ride);
+    // Move socket event listener inside useEffect to prevent unexpected re-renders
+    useEffect(() => {
+        const handleRideConfirmed = (rideData) => {
+            setVehicleFound(false);
+            setWaitingForDriver(true);
+            setRide(rideData);
+        };
+        
+        socket.on('ride-confirmed', handleRideConfirmed);
+        
+        // Clean up the event listener on component unmount
+        return () => {
+            socket.off('ride-confirmed', handleRideConfirmed);
+        };
+    }, [socket]);
+
+
+    socket.on('ride-started', (ride) => {
+        setWaitingForDriver(false);
+        navigate('/riding', { state: { ride } }); // Pass ride data to Riding component
     })
 
+
     const handlePickupChange = async (e) => {
-        setPickup(e.target.value)
+        const value = e.target.value || ''; // Ensure value is never null
+        setPickup(value);
+
+        if (value.trim() === '') {
+            setPickupSuggestions([]);
+            return;
+        }
+
         try {
+            console.log("Fetching pickup suggestions for:", value); // Debugging
             const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/maps/get-suggestions`, {
-                params: { input: e.target.value },
+                params: { input: value },
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem('token')}`
                 }
-
-            })
-            setPickupSuggestions(response.data)
-        } catch {
-            // handle error
+            });
+            console.log("Pickup suggestions received:", response.data); // Debugging
+            setPickupSuggestions(response.data || []);
+        } catch (error) {
+            console.error("Error fetching pickup suggestions:", error);
+            setPickupSuggestions([]);
         }
     }
 
     const handleDestinationChange = async (e) => {
-        setDestination(e.target.value)
+        const value = e.target.value || ''; // Ensure value is never null
+        setDestination(value);
+
+        if (value.trim() === '') {
+            setDestinationSuggestions([]);
+            return;
+        }
+
         try {
+            console.log("Fetching destination suggestions for:", value); // Debugging
             const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/maps/get-suggestions`, {
-                params: { input: e.target.value },
+                params: { input: value },
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem('token')}`
                 }
-            })
-            setDestinationSuggestions(response.data)
-        } catch {
-            // handle error
+            });
+            console.log("Destination suggestions received:", response.data); // Debugging
+            setDestinationSuggestions(response.data || []);
+        } catch (error) {
+            console.error("Error fetching destination suggestions:", error);
+            setDestinationSuggestions([]);
         }
     }
 
@@ -164,44 +199,58 @@ const Home = () => {
 
 
     async function findTrip() {
+        if (!pickup || !destination) {
+            alert("Please enter both pickup and destination locations");
+            return;
+        }
+        
         setVehiclePanel(true)
         setPanelOpen(false)
 
-        const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/rides/get-fare`, {
-            params: { pickup, destination },
-            headers: {
-                Authorization: `Bearer ${localStorage.getItem('token')}`
-            }
-        })
-
-
-        setFare(response.data)
-
-
+        try {
+            const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/rides/get-fare`, {
+                params: { pickup, destination },
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem('token')}`
+                }
+            });
+            setFare(response.data || {});
+        } catch (error) {
+            console.error("Error fetching fare:", error);
+            alert("Unable to calculate fare. Please try again.");
+            setVehiclePanel(false);
+        }
     }
 
     async function createRide(){
-
-        const response = await axios.post(`${import.meta..env.VITE_BASE_URL}/rides/create`,{
-            pickup,
-            destination,
-            vehicleType
-        },{
-            headers: {
-                Authorization: `Bearer ${localStorage.getItem('token')}`
-            }
-        })
+        if (!vehicleType) {
+            alert("Please select a vehicle type");
+            return;
+        }
+        
+        try {
+            const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/rides/create`, {
+                pickup,
+                destination,
+                vehicleType
+            }, {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem('token')}`
+                }
+            });
+            
+            console.log("Ride created:", response.data);
+        } catch (error) {
+            console.error("Error creating ride:", error);
+            alert("Unable to create ride. Please try again.");
+        }
     }
-
-
-
-
 
     return (
         <div className='h-screen relative overflow-hidden'>
             <img className='w-16 absolute left-5 top-5' src="https://upload.wikimedia.org/wikipedia/commons/c/cc/Uber_logo_2018.png" alt="" />
             <div className='h-screen w-screen'>
-                {/* image for temporary use  */}
+                <LiveTracking/>
                
             </div>
             <div className=' flex flex-col justify-end h-screen absolute top-0 w-full'>
@@ -212,9 +261,7 @@ const Home = () => {
                         <i className="ri-arrow-down-wide-line"></i>
                     </h5>
                     <h4 className='text-2xl font-semibold'>Find a trip</h4>
-                    <form className='relative py-3' onSubmit={(e) => {
-                        submitHandler(e)
-                    }}>
+                    <form className='relative py-3' onSubmit={submitHandler}>
                         <div className="line absolute h-16 w-1 top-[50%] -translate-y-1/2 left-5 bg-gray-700 rounded-full"></div>
                         <input
                             onClick={() => {

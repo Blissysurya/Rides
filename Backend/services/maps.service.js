@@ -54,28 +54,29 @@ module.exports.getDistanceTime= async (origin,distance)=>{
 }
 
 module.exports.getAutoCompleteSuggestions = async (input) => {
-
-  if(!input){
-    throw new Error('Input is required');
-  }
-
-  const apiKey = process.env.GOOGLE_MAPS_API;
-  const url= `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${encodeURIComponent(input)}&key=${apiKey}`;
-
-  try{
-    const response = await axios.get(url);
-
-    if(response.data.status === 'OK'){
-      return response.data.predictions.map(prediction => prediction.description).filter(value => value);
-    } else {
-      throw new Error('Unable to fetch autocomplete suggestions');
+    if (!input) {
+        throw new Error('Input is required');
     }
-  }catch(err){
-    console.log(err);
-    throw err;
-  }
 
-}
+    const apiKey = process.env.GOOGLE_MAPS_API;
+    const url = `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${encodeURIComponent(input)}&key=${apiKey}`;
+
+    try {
+        console.log("Calling Google Maps API for autocomplete suggestions:", url); // Debugging
+        const response = await axios.get(url);
+
+        if (response.data.status === 'OK') {
+            console.log("Google Maps API response:", response.data.predictions); // Debugging
+            return response.data.predictions.map(prediction => prediction.description).filter(value => value);
+        } else {
+            console.error("Google Maps API error:", response.data.status); // Debugging
+            throw new Error('Unable to fetch autocomplete suggestions');
+        }
+    } catch (err) {
+        console.error("Error fetching autocomplete suggestions:", err.message);
+        throw err;
+    }
+};
 
 module.exports.getCaptainsInTheRadius = async (ltd, lng, radius) => {
     console.log(`Looking for captains at coordinates: lat=${ltd}, lng=${lng} with radius=${radius}km`);

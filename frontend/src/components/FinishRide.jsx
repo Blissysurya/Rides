@@ -1,6 +1,33 @@
 import React from 'react'
 import { Link } from 'react-router-dom';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+
+
 const FinishRide = (props) => {
+    const navigate = useNavigate();
+
+    async function endRide(){
+        try {
+            const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/rides/end-ride`, {
+           
+                    rideId: props.ride._id,
+                },
+                {headers: {
+                    Authorization: `Bearer ${localStorage.getItem('token')}`
+                }}
+            );
+
+            if (response.status === 200) {
+              
+                navigate('/captain-home')
+            }
+        } catch (error) {
+            console.error("Error ending the ride:", error);
+        }                                               
+    }
+
+
     return (
         <div >
             <h5
@@ -16,7 +43,7 @@ const FinishRide = (props) => {
             <div className='flex items-center justify-between mt-4 p-4 border-2 bg-yellow-400 rounded-lg'>
                 <div className='flex items-center gap-3 '>
                     <img className='h-14 w-12 rounded-full object-cover' src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8cmFuZG9tJTIwcGVvcGxlfGVufDB8fDB8fHww"></img>
-                    <h2 className='text-xl font-medium'>Sassy</h2>
+                    <h2 className='text-xl font-medium'>{props.ride?.user.fullname.firstname}</h2>
                 </div>
                 <h5 className='text-lg font-semibold'>2.2 KM</h5>
             </div>
@@ -34,7 +61,7 @@ const FinishRide = (props) => {
                         <i className="text-lg ri-map-pin-2-fill"></i>
                         <div>
                             <h3 className="text-lg font-medium">562/11-A</h3>
-                            <p className="text-sm -mt-1 text-gray-600">NexEra Colony, Hardoi</p>
+                            <p className="text-sm -mt-1 text-gray-600">{props.ride?.pickup}</p>
                         </div>
                     </div>
 
@@ -43,7 +70,7 @@ const FinishRide = (props) => {
                         <i className="text-lg ri-map-pin-2-fill"></i>
                         <div>
                             <h3 className="text-lg font-medium">562/11-A</h3>
-                            <p className="text-sm -mt-1 text-gray-600">NexEra Colony, Hardoi</p>
+                            <p className="text-sm -mt-1 text-gray-600">{props.ride?.destination}</p>
                         </div>
                     </div>
 
@@ -51,7 +78,7 @@ const FinishRide = (props) => {
                     <div className="flex items-center gap-3 p-3 border-b-2">
                         <i className="text-lg ri-currency-line"></i>
                         <div>
-                            <h3 className="text-lg font-medium">$10</h3>
+                            <h3 className="text-lg font-medium">${props.ride?.fare}</h3>
                             <p className="text-sm -mt-1 text-gray-600">Cash</p>
                         </div>
                     </div>
@@ -64,9 +91,9 @@ const FinishRide = (props) => {
                 <div className='mt-6 w-full'>
 
 
-                    <Link to='/captain-home' className="flex justify-center w-full mt-4 text-lg bg-green-600 text-white font-semibold p-3 rounded-lg">
+                    <button onClick={endRide} className="flex justify-center w-full mt-4 text-lg bg-green-600 text-white font-semibold p-3 rounded-lg">
                         Finish Ride
-                    </Link>
+                    </button>
 
                     <p className=' mt-10 text-xm'>Click on finish ride button if you have completed the payment</p>
 
